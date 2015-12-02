@@ -8,7 +8,28 @@
  * set when that data is transferred to the TDR
  */
 #define USART_FLAG_TXE	((uint16_t) 0x0080)
+/*fub function*/
+    int fib(int num)
+    {
+            if (num == 0)
+                    return 0;
 
+            int res;
+            asm volatile("push {r3, r4, r5, r6}");
+            asm volatile("mov r6, %[arg]" :: [arg] "r"(num) :);
+            asm volatile("mov r3,#0\n"
+                         "mov r4,#1\n"
+                         "mov r5,#0\n"
+                         ".forloop:\n"
+                         "mov r3,r4\n"
+                         "mov r4,r5\n"
+                         "add r5,r3,r4\n"
+                         "subs r6,r6,#1\n"
+                         "bgt .forloop\n");
+            asm volatile("mov %[result], r5" : [result] "=r"(res) ::);
+            asm volatile("pop {r3, r4, r5, r6}");
+            return res;
+    }
 void usart_init(void)
 {
 	*(RCC_APB2ENR) |= (uint32_t) (0x00000001 | 0x00000004);
